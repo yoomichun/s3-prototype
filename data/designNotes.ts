@@ -35,18 +35,23 @@ export const designNotes = {
     headline: "From message board to advisor",
     text: "Messaging used to be a passive board between DMs, sellers, and agents. DMs can still message freely, but the panel now suggests next steps based on the property and conversation. AI suggestions are clearly separated from human messages.",
   },
-  "price-reductions": {
+  "bulk-approve": {
     n: 7,
+    headline: "Bulk decisions on the sure things",
+    text: "Approve all lets DMs make a bulk decision on every suggestion the AI rates as high confidence, instead of reviewing each property one by one. It cuts the time spent on routine pricing so they can focus on the harder calls.",
+  },
+  "price-reductions": {
+    n: 8,
     headline: "Hours of manual math, automated",
     text: "Pricing used to mean pulling comps and running underwriting numbers by hand, property by property. Now the system weighs current comps, days on market, and holding costs to suggest reductions, each with a confidence level. High-confidence ones can be approved in one step.",
   },
   comps: {
-    n: 8,
+    n: 9,
     headline: "Show the work",
     text: "Comps used to be gathered manually from sales around each property. Now they're pulled automatically, and the page shows the sources behind every suggestion. Research showed DMs needed confidence in valuations, and seeing the why builds that trust.",
   },
   calculator: {
-    n: 9,
+    n: 10,
     headline: "AI suggests, you decide",
     text: "AI recommends $412,000, but the DM stays in control. Drag the price to see the trade-off live: net proceeds, days to sell, and holding costs. The suggested price sells about 35 days faster and saves $4,200 in holding costs, for $21,200 less in net proceeds.",
   },

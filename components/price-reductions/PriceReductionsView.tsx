@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
 import { formatUsd, priceReductions } from "@/data/priceReductions";
 import NoteHotspot from "@/components/notes/NoteHotspot";
+import type { NoteId } from "@/data/designNotes";
 import PriceReductionsTable from "./PriceReductionsTable";
 
 type FilterKey = "stale" | "pending" | "high";
@@ -30,10 +31,11 @@ const filters: { key: FilterKey; label: string; match: (r: (typeof priceReductio
 
 const highConfidence = priceReductions.filter((r) => r.confidence === "High");
 
-function StatCard({ label, value, action }: { label: string; value: number; action?: React.ReactNode }) {
+function StatCard({ label, value, action, note }: { label: string; value: number; action?: React.ReactNode; note?: NoteId }) {
   return (
     <Box
       sx={(t) => ({
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -45,6 +47,7 @@ function StatCard({ label, value, action }: { label: string; value: number; acti
         textAlign: "center",
       })}
     >
+      {note && <NoteHotspot id={note} top={-12} left={-12} placement="top-start" />}
       <Typography variant="body2" sx={{ color: "text.secondary" }}>
         {label}
       </Typography>
@@ -112,6 +115,7 @@ export default function PriceReductionsView() {
         <StatCard
           label="High-confidence price reductions"
           value={highConfidence.length}
+          note="bulk-approve"
           action={
             <Button
               disabled={allHighApproved}

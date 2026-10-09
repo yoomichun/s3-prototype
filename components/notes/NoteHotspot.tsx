@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip, { type TooltipProps } from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { designNotes, type NoteId } from "@/data/designNotes";
 import { notesColors } from "./notesColors";
@@ -18,7 +18,17 @@ const GAP = 8; // space between the pin and the section it points at
  * By default it sits in the gutter, a small gap left of the section's left edge, level with a 24px heading.
  * `top` and `left` are the pin's own top-left corner relative to that section.
  */
-export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: NoteId; top?: number; left?: number }) {
+export default function NoteHotspot({
+  id,
+  top = 6,
+  left = -SIZE - GAP,
+  placement = "bottom-start",
+}: {
+  id: NoteId;
+  top?: number;
+  left?: number;
+  placement?: TooltipProps["placement"];
+}) {
   const { on, openId, setOpenId } = useNotes();
   const lastPointer = useRef<string>("");
   if (!on) return null;
@@ -54,7 +64,7 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
           position: "absolute",
           inset: 0,
           borderRadius: "50%",
-          border: `3px solid ${notesColors.accent}`,
+          border: `1px solid ${notesColors.accent}`,
           pointerEvents: "none",
           animation: "notesRipple 3s ease-out infinite",
           "@keyframes notesRipple": {
@@ -83,7 +93,7 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
       />
       <Tooltip
         open={open}
-        placement="bottom-start"
+        placement={placement}
         title={
           <Box data-note-tooltip sx={{ width: 296 }}>
             <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium", color: notesColors.accent }}>
