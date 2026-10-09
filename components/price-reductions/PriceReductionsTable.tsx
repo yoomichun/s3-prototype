@@ -1,5 +1,6 @@
 "use client";
 
+import NoteAnchor from "@/components/notes/NoteAnchor";
 import NextLink from "next/link";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
@@ -102,13 +103,22 @@ export default function PriceReductionsTable({
             <TableCell sx={cellSx}>{r.confidence}</TableCell>
             <TableCell sx={cellSx}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0.5 }}>
-                {approvedIds.has(r.id) ? (
-                  <ApprovedChip />
-                ) : (
-                  <LinkText href={r.href} sx={{ fontWeight: "fontWeightMedium" }}>
-                    View details
-                  </LinkText>
-                )}
+                {(() => {
+                  const action = approvedIds.has(r.id) ? (
+                    <ApprovedChip />
+                  ) : (
+                    <LinkText href={r.href} sx={{ fontWeight: "fontWeightMedium" }}>
+                      View details
+                    </LinkText>
+                  );
+                  return r.id === "8110" ? (
+                    <NoteAnchor id="price-reductions" side="right">
+                      {action}
+                    </NoteAnchor>
+                  ) : (
+                    action
+                  );
+                })()}
               </Box>
             </TableCell>
           </TableRow>

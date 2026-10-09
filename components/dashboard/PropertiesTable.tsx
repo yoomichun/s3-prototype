@@ -133,7 +133,6 @@ export default function PropertiesTable() {
         boxShadow: 1,
       })}
     >
-      <NoteHotspot id="properties-table" top={22} />
       <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
         <Typography variant="h3" sx={{ color: "text.primary", flex: 1 }}>
           Properties
@@ -166,11 +165,12 @@ export default function PropertiesTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {properties.map((p) => {
+            {properties.map((p, index) => {
               const href = p.street === "8110 N 10th St" ? "/price-reductions/8110-n-10th-st" : undefined;
               return (
                 <TableRow key={p.street}>
-                  <TableCell sx={{ ...cellSx, py: 2 }}>
+                  <TableCell sx={{ ...cellSx, py: 2, position: "relative" }}>
+                    {index === 0 && <NoteHotspot id="properties-table" top={27} left={-16} />}
                     <Box sx={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                       <Typography
                         variant="body2"

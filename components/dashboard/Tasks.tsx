@@ -18,10 +18,9 @@ export default function Tasks() {
   const twoColumns = active.label === "Pre-listing tasks";
   return (
     <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
-      <NoteHotspot id="task-queue" />
       <CardHeader title="MLS disposition tasks" subtitle="Complete to-dos by following the links under each task category." />
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        <Box role="tablist" sx={(t) => ({ display: "flex", alignSelf: "flex-start", boxShadow: `inset 0 -1px 0 ${t.palette.divider}` })}>
+        <Box role="tablist" sx={(t) => ({ position: "relative", display: "flex", alignSelf: "flex-start", boxShadow: `inset 0 -1px 0 ${t.palette.divider}` })}>
           {taskTabs.map((t) => {
             const selected = t.label === tab;
             return (
@@ -46,6 +45,7 @@ export default function Tasks() {
               </ButtonBase>
             );
           })}
+          <NoteHotspot id="task-queue" top="calc(50% - 12px)" left="calc(100% + 8px)" />
         </Box>
         <Box
           sx={(t) => ({

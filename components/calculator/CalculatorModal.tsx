@@ -111,7 +111,6 @@ function CalculatorBody({ onClose, onApprove }: { onClose: () => void; onApprove
 
   return (
     <Box sx={{ position: "relative", p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
-      <NoteHotspot id="calculator" top={-12} left={-12} />
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton aria-label="Back" onClick={onClose} sx={{ p: 0, color: "text.primary" }}>
@@ -146,6 +145,7 @@ function CalculatorBody({ onClose, onApprove }: { onClose: () => void; onApprove
         />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ position: "relative", height: 64 }}>
+            <NoteHotspot id="calculator" top={30} left={-48} />
             <Marker value={suggestedPrice} label={`Suggested ${formatPriceK(suggestedPrice)}`} color="primary.main" />
             <Marker value={currentPrice} label={`Current ${formatPriceK(currentPrice)}`} color="slate.600" />
             <Slider

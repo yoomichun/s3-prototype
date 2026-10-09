@@ -1,5 +1,6 @@
 "use client";
 
+import NoteAnchor from "@/components/notes/NoteAnchor";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -63,9 +64,11 @@ export default function SuggestedPriceCard() {
           <Button variant="contained" onClick={() => approvePrice(suggestedPrice)}>
             Approve
           </Button>
-          <Button variant="outlined" onClick={openCalculator}>
-            Adjust price
-          </Button>
+          <NoteAnchor id="comps" side="bottom" placement="bottom-start">
+            <Button variant="outlined" onClick={openCalculator}>
+              Adjust price
+            </Button>
+          </NoteAnchor>
           <Button>Dismiss</Button>
         </Box>
       )}

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import NoteHotspot from "@/components/notes/NoteHotspot";
 import { comps, defaultCompId } from "@/data/property";
 import CompsMap from "./CompsMapLoader";
 import CompsTable from "./CompsTable";
@@ -24,7 +23,6 @@ export default function PropertyView() {
       <PriceHistory />
 
       <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
-        <NoteHotspot id="comps" top={2} />
         <Typography variant="h5" sx={{ color: "text.primary" }}>
           Listed and sold comparables
         </Typography>

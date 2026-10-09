@@ -15,8 +15,7 @@ import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
 import { formatUsd, priceReductions } from "@/data/priceReductions";
-import NoteHotspot from "@/components/notes/NoteHotspot";
-import type { NoteId } from "@/data/designNotes";
+import NoteAnchor from "@/components/notes/NoteAnchor";
 import PriceReductionsTable from "./PriceReductionsTable";
 
 type FilterKey = "stale" | "pending" | "high";
@@ -31,7 +30,7 @@ const filters: { key: FilterKey; label: string; match: (r: (typeof priceReductio
 
 const highConfidence = priceReductions.filter((r) => r.confidence === "High");
 
-function StatCard({ label, value, action, note }: { label: string; value: number; action?: React.ReactNode; note?: NoteId }) {
+function StatCard({ label, value, action }: { label: string; value: number; action?: React.ReactNode }) {
   return (
     <Box
       sx={(t) => ({
@@ -47,7 +46,6 @@ function StatCard({ label, value, action, note }: { label: string; value: number
         textAlign: "center",
       })}
     >
-      {note && <NoteHotspot id={note} top={-12} left={-12} placement="top-start" />}
       <Typography variant="body2" sx={{ color: "text.secondary" }}>
         {label}
       </Typography>
@@ -115,15 +113,16 @@ export default function PriceReductionsView() {
         <StatCard
           label="High-confidence price reductions"
           value={highConfidence.length}
-          note="bulk-approve"
           action={
-            <Button
-              disabled={allHighApproved}
-              onClick={() => setConfirmOpen(true)}
-              sx={{ px: 1, py: 0.25, color: "primary.main" }}
-            >
-              Approve all
-            </Button>
+            <NoteAnchor id="bulk-approve" side="right" placement="top-start">
+              <Button
+                disabled={allHighApproved}
+                onClick={() => setConfirmOpen(true)}
+                sx={{ px: 1, py: 0.25, color: "primary.main" }}
+              >
+                Approve all
+              </Button>
+            </NoteAnchor>
           }
         />
       </Box>
@@ -140,8 +139,7 @@ export default function PriceReductionsView() {
       </Box>
 
       <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
-        <NoteHotspot id="price-reductions" top={2} />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
           <Typography variant="h5" sx={{ color: "text.primary" }}>
             Suggested price reductions
           </Typography>

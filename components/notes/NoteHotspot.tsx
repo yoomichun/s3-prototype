@@ -25,8 +25,8 @@ export default function NoteHotspot({
   placement = "bottom-start",
 }: {
   id: NoteId;
-  top?: number;
-  left?: number;
+  top?: number | string;
+  left?: number | string;
   placement?: TooltipProps["placement"];
 }) {
   const { on, openId, setOpenId } = useNotes();
@@ -101,6 +101,9 @@ export default function NoteHotspot({
             </Typography>
             <Typography variant="body2" sx={{ color: notesColors.white }}>
               {note.text}
+            </Typography>
+            <Typography variant="body2" sx={{ color: notesColors.white, mt: 1, fontWeight: "fontWeightMedium" }}>
+              {note.action}
             </Typography>
           </Box>
         }

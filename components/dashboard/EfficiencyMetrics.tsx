@@ -46,8 +46,7 @@ export default function EfficiencyMetrics() {
 
   return (
     <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
-      <NoteHotspot id="efficiency-metrics" />
-      <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 3 }}>
         <CardHeader
           title="Efficiency metrics"
           subtitle={
@@ -60,7 +59,8 @@ export default function EfficiencyMetrics() {
             </>
           }
         />
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+        <Box sx={{ position: "relative", display: "flex", alignItems: "center", gap: 3 }}>
+          <NoteHotspot id="efficiency-metrics" top="calc(50% - 12px)" left={-32} />
           <IconButton aria-label="Previous metric" disabled={edge.start} onClick={() => page(-1)} sx={arrowSx}>
             <ArrowBackOutlined sx={{ fontSize: 16 }} />
           </IconButton>

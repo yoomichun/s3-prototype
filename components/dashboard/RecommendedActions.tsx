@@ -27,8 +27,7 @@ const cellSx = { height: 64, p: 2, typography: "body2", color: "text.primary", b
 export default function RecommendedActions() {
   return (
     <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
-      <NoteHotspot id="recommended-actions" />
-      <CardHeader
+            <CardHeader
         title="Recommended actions"
         subtitle="Found by reviewing all your properties. Approve to add to your task queue."
       />
@@ -44,7 +43,8 @@ export default function RecommendedActions() {
         <TableBody>
           {recommendedActions.map((row) => (
             <TableRow key={row.type}>
-              <TableCell sx={cellSx}>
+              <TableCell sx={{ ...cellSx, position: "relative" }}>
+                {row.type === "Price" && <NoteHotspot id="recommended-actions" top={20} left={-32} />}
                 <Box
                   sx={(t) => ({
                     width: 90,

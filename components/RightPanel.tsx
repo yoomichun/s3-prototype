@@ -566,7 +566,7 @@ export default function RightPanel() {
     <Box sx={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch" }}>
       {/* The sticky frame holds the panel and its design note pin, so the pin can sit on the panel's left edge without being clipped by the panel's own scrolling */}
       <Box sx={(t) => ({ position: "sticky", top: 16, width: t.custom.layout.rightPanelWidth })}>
-        <NoteHotspot id={tab === "ask" ? "ask-tab" : "message-tab"} top={46} left={-12} />
+        <NoteHotspot id={tab === "ask" ? "ask-tab" : "message-tab"} top={52} left={tab === "ask" ? -4 : "calc(100% - 16px)"} />
         <Box
           component="aside"
           sx={(t) => ({
