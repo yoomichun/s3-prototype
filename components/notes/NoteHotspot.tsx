@@ -11,13 +11,14 @@ import { useNotes } from "./NotesProvider";
 
 const SIZE = 24;
 const RING = 48;
+const GAP = 8; // space between the pin and the section it points at
 
 /**
  * Pulsing numbered pin for a design note. Render it inside a `position: relative` section.
- * By default it sits in the gutter, touching the section's left edge, level with a 24px heading.
+ * By default it sits in the gutter, a small gap left of the section's left edge, level with a 24px heading.
  * `top` and `left` are the pin's own top-left corner relative to that section.
  */
-export default function NoteHotspot({ id, top = 6, left = -SIZE }: { id: NoteId; top?: number; left?: number }) {
+export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: NoteId; top?: number; left?: number }) {
   const { on, openId, setOpenId } = useNotes();
   const lastPointer = useRef<string>("");
   if (!on) return null;
@@ -100,20 +101,14 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE }: { id: NoteId;
           onClick={() => setOpenId(open && lastPointer.current !== "mouse" ? null : id)}
           onFocus={(e) => e.currentTarget.matches(":focus-visible") && setOpenId(id)}
           onBlur={() => open && setOpenId(null)}
-          sx={(t) => ({
+          sx={{
             position: "absolute",
             inset: 0,
             borderRadius: "50%",
             bgcolor: notesColors.white,
             border: `1px solid ${notesColors.accent}`,
-            color: notesColors.accent,
-            ...t.typography.caption,
-            fontWeight: t.typography.fontWeightMedium,
-            lineHeight: 1,
-          })}
-        >
-          {note.n}
-        </ButtonBase>
+          }}
+        />
       </Tooltip>
     </Box>
   );

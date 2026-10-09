@@ -92,35 +92,13 @@ export default function NotesProvider({ children }: { children: React.ReactNode 
   return (
     <NotesContext.Provider value={value}>
       {children}
-      <ButtonBase
-        onClick={toggle}
-        aria-pressed={on}
-        sx={(t) => ({
-          position: "fixed",
-          top: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1250,
-          width: 240,
-          height: 50,
-          borderRadius: "48px",
-          bgcolor: on ? notesColors.accent : notesColors.white,
-          border: `1px solid ${on ? notesColors.white : notesColors.accent}`,
-          color: on ? notesColors.white : notesColors.accent,
-          fontFamily: t.typography.fontFamily,
-          fontSize: 20,
-          lineHeight: "32px",
-          fontWeight: t.typography.fontWeightMedium,
-          "&:focus-visible": { outline: `2px solid ${notesColors.accent}`, outlineOffset: 3 },
-        })}
-      >
-        {/* Soft pink blur behind the pill; this is the part that pulses */}
+      <Box sx={{ position: "fixed", right: 20, bottom: 20, zIndex: 1250, width: 240, height: 50 }}>
+        {/* Soft pink blur behind the pill; this is the part that pulses. It is a sibling of the button so the button's fill covers it. */}
         <Box
           aria-hidden
           sx={{
             position: "absolute",
-            inset: -1,
-            zIndex: -1,
+            inset: 0,
             borderRadius: "48px",
             bgcolor: notesColors.glow,
             filter: "blur(9.1px)",
@@ -132,8 +110,26 @@ export default function NotesProvider({ children }: { children: React.ReactNode 
             "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
         />
-        {on ? "Hide design notes" : "Show design notes"}
-      </ButtonBase>
+        <ButtonBase
+          onClick={toggle}
+          aria-pressed={on}
+          sx={(t) => ({
+            position: "absolute",
+            inset: 0,
+            borderRadius: "48px",
+            bgcolor: on ? notesColors.accent : notesColors.white,
+            border: `1px solid ${on ? notesColors.white : notesColors.accent}`,
+            color: on ? notesColors.white : notesColors.accent,
+            fontFamily: t.typography.fontFamily,
+            fontSize: 20,
+            lineHeight: "32px",
+            fontWeight: t.typography.fontWeightMedium,
+            "&:focus-visible": { outline: `2px solid ${notesColors.accent}`, outlineOffset: 3 },
+          })}
+        >
+          {on ? "Hide design notes" : "Show design notes"}
+        </ButtonBase>
+      </Box>
     </NotesContext.Provider>
   );
 }
