@@ -111,7 +111,7 @@ function CalculatorBody({ onClose, onApprove }: { onClose: () => void; onApprove
 
   return (
     <Box sx={{ position: "relative", p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
-      <NoteHotspot id="calculator" />
+      <NoteHotspot id="calculator" top={-12} left={-12} />
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton aria-label="Back" onClick={onClose} sx={{ p: 0, color: "text.primary" }}>

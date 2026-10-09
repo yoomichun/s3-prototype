@@ -136,7 +136,7 @@ export default function PriceReductionsView() {
       </Box>
 
       <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
-        <NoteHotspot id="price-reductions" />
+        <NoteHotspot id="price-reductions" top={2} />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
           <Typography variant="h5" sx={{ color: "text.primary" }}>
             Suggested price reductions

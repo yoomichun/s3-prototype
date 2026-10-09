@@ -133,7 +133,7 @@ export default function PropertiesTable() {
         boxShadow: 1,
       })}
     >
-      <NoteHotspot id="properties-table" />
+      <NoteHotspot id="properties-table" top={22} />
       <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
         <Typography variant="h3" sx={{ color: "text.primary", flex: 1 }}>
           Properties

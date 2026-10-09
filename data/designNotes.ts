@@ -1,10 +1,7 @@
-import type { TooltipProps } from "@mui/material/Tooltip";
-
 export type DesignNote = {
   n: number;
   headline: string;
   text: string;
-  placement?: TooltipProps["placement"];
 };
 
 export const designNotes = {
@@ -32,13 +29,11 @@ export const designNotes = {
     n: 5,
     headline: "One assistant, every page",
     text: "DMs can ask anything from anywhere. It's context-aware: suggestions change with the page and property in view. Every question is also research, showing which needs the product doesn't cover yet and what to build next.",
-    placement: "left-start",
   },
   "message-tab": {
     n: 6,
     headline: "From message board to advisor",
     text: "Messaging used to be a passive board between DMs, sellers, and agents. DMs can still message freely, but the panel now suggests next steps based on the property and conversation. AI suggestions are clearly separated from human messages.",
-    placement: "left-start",
   },
   "price-reductions": {
     n: 7,

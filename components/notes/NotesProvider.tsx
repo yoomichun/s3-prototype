@@ -97,40 +97,39 @@ export default function NotesProvider({ children }: { children: React.ReactNode 
         aria-pressed={on}
         sx={(t) => ({
           position: "fixed",
-          left: 16,
-          bottom: 16,
+          top: 20,
+          left: "50%",
+          transform: "translateX(-50%)",
           zIndex: 1250,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          pl: 1.5,
-          pr: 2,
-          py: 1,
-          borderRadius: `${t.custom.radius.pill}px`,
-          bgcolor: notesColors.ink,
-          color: notesColors.onInk,
-          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
-          ...t.typography.body2,
+          width: 240,
+          height: 50,
+          borderRadius: "48px",
+          bgcolor: on ? notesColors.accent : notesColors.white,
+          border: `1px solid ${on ? notesColors.white : notesColors.accent}`,
+          color: on ? notesColors.white : notesColors.accent,
+          fontFamily: t.typography.fontFamily,
+          fontSize: 20,
+          lineHeight: "32px",
           fontWeight: t.typography.fontWeightMedium,
-          "&:focus-visible": { outline: `2px solid ${notesColors.accent}`, outlineOffset: 2 },
+          "&:focus-visible": { outline: `2px solid ${notesColors.accent}`, outlineOffset: 3 },
         })}
       >
+        {/* Soft pink blur behind the pill; this is the part that pulses */}
         <Box
-          component="span"
           aria-hidden
           sx={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            bgcolor: notesColors.accent,
-            ...(!on && {
-              animation: "notesPulse 2s ease-in-out infinite",
-              "@keyframes notesPulse": {
-                "0%, 100%": { boxShadow: `0 0 0 0 ${notesColors.accent}99` },
-                "50%": { boxShadow: `0 0 0 6px ${notesColors.accent}00` },
-              },
-              "@media (prefers-reduced-motion: reduce)": { animation: "none" },
-            }),
+            position: "absolute",
+            inset: -1,
+            zIndex: -1,
+            borderRadius: "48px",
+            bgcolor: notesColors.glow,
+            filter: "blur(9.1px)",
+            animation: "notesPillGlow 2.4s ease-in-out infinite",
+            "@keyframes notesPillGlow": {
+              "0%, 100%": { transform: "scale(1)", opacity: 1 },
+              "50%": { transform: "scale(1.06)", opacity: 0.55 },
+            },
+            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
         />
         {on ? "Hide design notes" : "Show design notes"}

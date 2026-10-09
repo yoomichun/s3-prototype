@@ -564,27 +564,27 @@ export default function RightPanel() {
   return (
     // The wrapper spans the panel's grid row so the sticky panel stops where that row ends
     <Box sx={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch" }}>
-      <Box
-        component="aside"
-        sx={(t) => ({
-          width: t.custom.layout.rightPanelWidth,
-          position: "sticky",
-          top: 16,
-          maxHeight: "calc(100vh - 32px)",
-          overflowY: "auto",
-          bgcolor: "background.paper",
-          borderRadius: `${t.custom.radius.md}px`,
-          boxShadow: 1,
-          px: 3,
-          py: 5,
-          display: "flex",
-          flexDirection: "column",
-          gap: 5,
-        })}
-      >
-        <NoteHotspot id={tab === "ask" ? "ask-tab" : "message-tab"} top={8} left={8} />
-        <TabSwitch value={tab} onChange={changeTab} />
-        {tab === "ask" ? <AskView onOpenConversation={openConversation} /> : <MessageView startInConversation={openedFromPreview} />}
+      {/* The sticky frame holds the panel and its design note pin, so the pin can sit on the panel's left edge without being clipped by the panel's own scrolling */}
+      <Box sx={(t) => ({ position: "sticky", top: 16, width: t.custom.layout.rightPanelWidth })}>
+        <NoteHotspot id={tab === "ask" ? "ask-tab" : "message-tab"} top={46} left={-12} />
+        <Box
+          component="aside"
+          sx={(t) => ({
+            maxHeight: "calc(100vh - 32px)",
+            overflowY: "auto",
+            bgcolor: "background.paper",
+            borderRadius: `${t.custom.radius.md}px`,
+            boxShadow: 1,
+            px: 3,
+            py: 5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+          })}
+        >
+          <TabSwitch value={tab} onChange={changeTab} />
+          {tab === "ask" ? <AskView onOpenConversation={openConversation} /> : <MessageView startInConversation={openedFromPreview} />}
+        </Box>
       </Box>
     </Box>
   );
