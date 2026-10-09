@@ -1,6 +1,7 @@
 "use client";
 
 import NextLink from "next/link";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
@@ -25,7 +26,8 @@ const cellSx = { height: 64, p: 2, typography: "body2", color: "text.primary", b
 
 export default function RecommendedActions() {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
+      <NoteHotspot id="recommended-actions" />
       <CardHeader
         title="Recommended actions"
         subtitle="Found by reviewing all your properties. Approve to add to your task queue."

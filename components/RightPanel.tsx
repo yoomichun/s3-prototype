@@ -34,6 +34,7 @@ import {
 } from "@/data/messages";
 import { priceReductions } from "@/data/priceReductions";
 import { subject } from "@/data/property";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import { useCalculator } from "@/components/calculator/CalculatorProvider";
 
 const propertyPath = "/price-reductions/8110-n-10th-st";
@@ -581,6 +582,7 @@ export default function RightPanel() {
           gap: 5,
         })}
       >
+        <NoteHotspot id={tab === "ask" ? "ask-tab" : "message-tab"} top={8} left={8} />
         <TabSwitch value={tab} onChange={changeTab} />
         {tab === "ask" ? <AskView onOpenConversation={openConversation} /> : <MessageView startInConversation={openedFromPreview} />}
       </Box>

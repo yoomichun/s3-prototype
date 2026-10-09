@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
@@ -16,7 +17,8 @@ export default function Tasks() {
   const rows = active.label === "On market tasks" ? onMarketTasks : active.label === "Pre-listing tasks" ? preListingTasks : [];
   const twoColumns = active.label === "Pre-listing tasks";
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
+      <NoteHotspot id="task-queue" />
       <CardHeader title="MLS disposition tasks" subtitle="Complete to-dos by following the links under each task category." />
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Box role="tablist" sx={(t) => ({ display: "flex", alignSelf: "flex-start", boxShadow: `inset 0 -1px 0 ${t.palette.divider}` })}>

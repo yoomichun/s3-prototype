@@ -21,6 +21,7 @@ import {
   priceRange,
   suggestedPrice,
 } from "@/data/priceCalculator";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import { formatUsd } from "@/data/priceReductions";
 import { address } from "@/data/property";
 
@@ -109,7 +110,8 @@ function CalculatorBody({ onClose, onApprove }: { onClose: () => void; onApprove
   const valid = price >= priceRange.min && price <= priceRange.max;
 
   return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ position: "relative", p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
+      <NoteHotspot id="calculator" />
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton aria-label="Back" onClick={onClose} sx={{ p: 0, color: "text.primary" }}>
@@ -193,7 +195,7 @@ export default function CalculatorModal({
       aria-labelledby="calculator-title"
       fullWidth
       maxWidth={false}
-      slotProps={{ paper: { sx: (t) => ({ maxWidth: 560, borderRadius: `${t.custom.radius.md}px` }) } }}
+      slotProps={{ paper: { sx: (t) => ({ overflow: "visible", maxWidth: 560, borderRadius: `${t.custom.radius.md}px` }) } }}
     >
       <CalculatorBody onClose={onClose} onApprove={onApprove} />
     </Dialog>

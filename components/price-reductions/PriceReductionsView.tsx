@@ -15,6 +15,7 @@ import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
 import { formatUsd, priceReductions } from "@/data/priceReductions";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import PriceReductionsTable from "./PriceReductionsTable";
 
 type FilterKey = "stale" | "pending" | "high";
@@ -134,7 +135,8 @@ export default function PriceReductionsView() {
         </Button>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
+        <NoteHotspot id="price-reductions" />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
           <Typography variant="h5" sx={{ color: "text.primary" }}>
             Suggested price reductions

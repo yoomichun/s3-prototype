@@ -5,13 +5,16 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "@/theme/theme";
 import CalculatorProvider from "@/components/calculator/CalculatorProvider";
+import NotesProvider from "@/components/notes/NotesProvider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AppRouterCacheProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <CalculatorProvider>{children}</CalculatorProvider>
+        <NotesProvider>
+          <CalculatorProvider>{children}</CalculatorProvider>
+        </NotesProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>
   );

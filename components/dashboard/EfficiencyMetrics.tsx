@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
@@ -44,7 +45,8 @@ export default function EfficiencyMetrics() {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
+      <NoteHotspot id="efficiency-metrics" />
       <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 3 }}>
         <CardHeader
           title="Efficiency metrics"

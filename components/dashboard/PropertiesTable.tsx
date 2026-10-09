@@ -1,5 +1,6 @@
 "use client";
 
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import NextLink from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -122,6 +123,7 @@ export default function PropertiesTable() {
   return (
     <Box
       sx={(t) => ({
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         gap: 3,
@@ -131,6 +133,7 @@ export default function PropertiesTable() {
         boxShadow: 1,
       })}
     >
+      <NoteHotspot id="properties-table" />
       <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
         <Typography variant="h3" sx={{ color: "text.primary", flex: 1 }}>
           Properties
