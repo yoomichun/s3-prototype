@@ -37,10 +37,10 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
           borderRadius: "50%",
           bgcolor: notesColors.glow,
           filter: "blur(10.8px)",
-          animation: "notesGlow 2.4s ease-in-out infinite",
+          animation: "notesGlow 3s ease-in-out infinite",
           "@keyframes notesGlow": {
             "0%, 100%": { transform: "scale(1)", opacity: 1 },
-            "50%": { transform: "scale(1.25)", opacity: 0.55 },
+            "50%": { transform: "scale(1.9)", opacity: 0.35 },
           },
           "@media (prefers-reduced-motion: reduce)": { animation: "none" },
         }}
@@ -105,8 +105,14 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
             position: "absolute",
             inset: 0,
             borderRadius: "50%",
-            bgcolor: notesColors.white,
-            border: `1px solid ${notesColors.accent}`,
+            bgcolor: notesColors.accent,
+            border: `1px solid ${notesColors.white}`,
+            animation: "notesDot 3s ease-in-out infinite",
+            "@keyframes notesDot": {
+              "0%, 100%": { transform: "scale(1)" },
+              "50%": { transform: "scale(1.12)" },
+            },
+            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
         />
       </Tooltip>
