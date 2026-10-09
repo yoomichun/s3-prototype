@@ -36,13 +36,30 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
           inset: 0,
           borderRadius: "50%",
           bgcolor: notesColors.glow,
-          filter: "blur(10.8px)",
+          filter: "blur(9px)",
           animation: "notesGlow 3s ease-in-out infinite",
           "@keyframes notesGlow": {
             "0%, 100%": { transform: "scale(1)", opacity: 1 },
-            "50%": { transform: "scale(1.9)", opacity: 0.35 },
+            "50%": { transform: "scale(2.6)", opacity: 0.25 },
           },
           "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+        }}
+      />
+      {/* Ripple ring that expands outward and fades, so the pulse reads clearly */}
+      <Box
+        aria-hidden
+        sx={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          border: `2px solid ${notesColors.accent}`,
+          pointerEvents: "none",
+          animation: "notesRipple 3s ease-out infinite",
+          "@keyframes notesRipple": {
+            "0%": { transform: "scale(1)", opacity: 0.9 },
+            "75%, 100%": { transform: "scale(2.8)", opacity: 0 },
+          },
+          "@media (prefers-reduced-motion: reduce)": { animation: "none", opacity: 0 },
         }}
       />
       {/* Dashed ring shown while the note is open (hover, tap or focus) */}
@@ -107,10 +124,11 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
             borderRadius: "50%",
             bgcolor: notesColors.accent,
             border: `1px solid ${notesColors.white}`,
+            opacity: 0.8,
             animation: "notesDot 3s ease-in-out infinite",
             "@keyframes notesDot": {
               "0%, 100%": { transform: "scale(1)" },
-              "50%": { transform: "scale(1.12)" },
+              "50%": { transform: "scale(1.25)" },
             },
             "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
