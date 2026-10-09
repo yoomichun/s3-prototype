@@ -102,10 +102,13 @@ export default function PriceReductionsTable({
             <TableCell sx={cellSx}>{r.confidence}</TableCell>
             <TableCell sx={cellSx}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0.5 }}>
-                {approvedIds.has(r.id) && <ApprovedChip />}
-                <LinkText href={r.href} sx={{ fontWeight: "fontWeightMedium" }}>
-                  View details
-                </LinkText>
+                {approvedIds.has(r.id) ? (
+                  <ApprovedChip />
+                ) : (
+                  <LinkText href={r.href} sx={{ fontWeight: "fontWeightMedium" }}>
+                    View details
+                  </LinkText>
+                )}
               </Box>
             </TableCell>
           </TableRow>

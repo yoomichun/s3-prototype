@@ -3,10 +3,11 @@ import Tasks from "@/components/dashboard/Tasks";
 import RecommendedActions from "@/components/dashboard/RecommendedActions";
 import EfficiencyMetrics from "@/components/dashboard/EfficiencyMetrics";
 import PropertiesTable from "@/components/dashboard/PropertiesTable";
+import { DashboardResetBoundary } from "@/components/DashboardReset";
 
 export default function DashboardPage() {
   return (
-    <>
+    <DashboardResetBoundary>
       <Box sx={{ gridColumn: 1, gridRow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 5 }}>
         <Tasks />
         <RecommendedActions />
@@ -15,6 +16,6 @@ export default function DashboardPage() {
       <Box sx={{ gridColumn: "1 / -1", gridRow: 2, mt: 5 }}>
         <PropertiesTable />
       </Box>
-    </>
+    </DashboardResetBoundary>
   );
 }

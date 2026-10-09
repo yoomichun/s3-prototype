@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDashboardReset } from "./DashboardReset";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import Box from "@mui/material/Box";
@@ -90,6 +91,7 @@ const itemSx = {
 } as const;
 
 function NavRow({ item, open, onToggle }: { item: NavItem; open?: boolean; onToggle?: () => void }) {
+  const { resetDashboard } = useDashboardReset();
   const Icon = item.icon;
   const hasChildren = Boolean(item.children);
   const content = (
@@ -106,7 +108,7 @@ function NavRow({ item, open, onToggle }: { item: NavItem; open?: boolean; onTog
     : {};
   if (item.href && !hasChildren) {
     return (
-      <ButtonBase component={NextLink} href={item.href} sx={itemSx}>
+      <ButtonBase component={NextLink} href={item.href} onClick={item.href === "/" ? resetDashboard : undefined} sx={itemSx}>
         {content}
       </ButtonBase>
     );
@@ -118,11 +120,10 @@ function NavRow({ item, open, onToggle }: { item: NavItem; open?: boolean; onTog
   );
 }
 
-function NavGroup({ item, defaultOpen }: { item: NavItem; defaultOpen: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
+function NavGroup({ item, open, onToggle }: { item: NavItem; open: boolean; onToggle: () => void }) {
   return (
     <Box>
-      <NavRow item={item} open={open} onToggle={item.children ? () => setOpen((o) => !o) : undefined} />
+      <NavRow item={item} open={open} onToggle={item.children ? onToggle : undefined} />
       {open &&
         item.children?.map((child, i) => {
           const last = i === item.children!.length - 1;
@@ -157,6 +158,9 @@ function NavGroup({ item, defaultOpen }: { item: NavItem; defaultOpen: boolean }
 export default function LeftNav() {
   const pathname = usePathname();
   const onPriceReduction = pathname.startsWith("/price-reductions");
+  // Only one group is open at a time: opening another group closes the previous one.
+  const [openGroup, setOpenGroup] = useState<string | null>(onPriceReduction ? "On Market" : null);
+  const toggleGroup = (label: string) => setOpenGroup((current) => (current === label ? null : label));
   return (
     <Box
       component="nav"
@@ -184,7 +188,7 @@ export default function LeftNav() {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Box>
             {mainItems.map((item) => (
-              <NavGroup key={item.label} item={item} defaultOpen={item.label === "On Market" && onPriceReduction} />
+              <NavGroup key={item.label} item={item} open={openGroup === item.label} onToggle={() => toggleGroup(item.label)} />
             ))}
           </Box>
           <Box>
@@ -192,7 +196,7 @@ export default function LeftNav() {
               <Box sx={{ width: "100%", borderTop: 1, borderColor: "divider", opacity: 0.3 }} />
             </Box>
             {secondaryItems.map((item) => (
-              <NavGroup key={item.label} item={item} defaultOpen={false} />
+              <NavGroup key={item.label} item={item} open={openGroup === item.label} onToggle={() => toggleGroup(item.label)} />
             ))}
           </Box>
         </Box>

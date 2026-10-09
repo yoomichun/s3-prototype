@@ -4,10 +4,20 @@ import Box from "@mui/material/Box";
 import LeftNav from "./LeftNav";
 import TopBar from "./TopBar";
 import RightPanel from "./RightPanel";
+import { DashboardResetProvider, useDashboardReset } from "./DashboardReset";
 
 // Pages render their main column as the first child (auto-placed in column 1, row 1).
 // A page can add a full-width section under the panel row with `gridColumn: "1 / -1"`.
 export default function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <DashboardResetProvider>
+      <ShellLayout>{children}</ShellLayout>
+    </DashboardResetProvider>
+  );
+}
+
+function ShellLayout({ children }: { children: React.ReactNode }) {
+  const { resetKey } = useDashboardReset();
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
       <LeftNav />
@@ -26,7 +36,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           })}
         >
           {children}
-          <RightPanel />
+          <RightPanel key={resetKey} />
         </Box>
       </Box>
     </Box>
