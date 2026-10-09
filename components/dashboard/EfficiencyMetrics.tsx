@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
@@ -27,6 +27,15 @@ export default function EfficiencyMetrics() {
     if (!el) return;
     setEdge({ start: el.scrollLeft <= 1, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 });
   };
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    updateEdge();
+    const observer = new ResizeObserver(updateEdge);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const page = (dir: 1 | -1) => {
     const el = trackRef.current;
     const card = el?.firstElementChild as HTMLElement | null;
