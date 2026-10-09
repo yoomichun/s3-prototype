@@ -40,9 +40,11 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
           animation: "notesGlow 3s ease-in-out infinite",
           "@keyframes notesGlow": {
             "0%, 100%": { transform: "scale(1)", opacity: 1 },
-            "50%": { transform: "scale(2.6)", opacity: 0.25 },
+            "50%": { transform: "scale(3)", opacity: 0.2 },
           },
-          "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+          // Reduce motion: no movement, but the glow still fades in and out so the dot stays easy to find
+          "@keyframes notesBreathe": { "0%, 100%": { opacity: 0.2 }, "50%": { opacity: 1 } },
+          "@media (prefers-reduced-motion: reduce)": { animation: "notesBreathe 3s ease-in-out infinite" },
         }}
       />
       {/* Ripple ring that expands outward and fades, so the pulse reads clearly */}
@@ -52,14 +54,15 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
           position: "absolute",
           inset: 0,
           borderRadius: "50%",
-          border: `2px solid ${notesColors.accent}`,
+          border: `3px solid ${notesColors.accent}`,
           pointerEvents: "none",
           animation: "notesRipple 3s ease-out infinite",
           "@keyframes notesRipple": {
-            "0%": { transform: "scale(1)", opacity: 0.9 },
-            "75%, 100%": { transform: "scale(2.8)", opacity: 0 },
+            "0%": { transform: "scale(1)", opacity: 1 },
+            "75%, 100%": { transform: "scale(3.4)", opacity: 0 },
           },
-          "@media (prefers-reduced-motion: reduce)": { animation: "none", opacity: 0 },
+          "@keyframes notesRingBreathe": { "0%, 100%": { opacity: 0.1 }, "50%": { opacity: 1 } },
+          "@media (prefers-reduced-motion: reduce)": { animation: "notesRingBreathe 3s ease-in-out infinite", transform: "scale(1.8)" },
         }}
       />
       {/* Dashed ring shown while the note is open (hover, tap or focus) */}
@@ -124,11 +127,11 @@ export default function NoteHotspot({ id, top = 6, left = -SIZE - GAP }: { id: N
             borderRadius: "50%",
             bgcolor: notesColors.accent,
             border: `1px solid ${notesColors.white}`,
-            opacity: 0.8,
+            opacity: 0.75,
             animation: "notesDot 3s ease-in-out infinite",
             "@keyframes notesDot": {
               "0%, 100%": { transform: "scale(1)" },
-              "50%": { transform: "scale(1.25)" },
+              "50%": { transform: "scale(1.35)" },
             },
             "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
