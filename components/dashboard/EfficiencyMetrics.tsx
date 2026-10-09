@@ -25,7 +25,7 @@ export default function EfficiencyMetrics() {
   const updateEdge = () => {
     const el = trackRef.current;
     if (!el) return;
-    setEdge({ start: el.scrollLeft <= 1, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 });
+    setEdge({ start: el.scrollLeft <= 8, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 });
   };
   useEffect(() => {
     const el = trackRef.current;
