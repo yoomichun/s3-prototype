@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import type { SvgIconComponent } from "@mui/icons-material";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
@@ -22,6 +23,7 @@ import HowToRegOutlined from "@mui/icons-material/HowToRegOutlined";
 import KeyboardArrowDownOutlined from "@mui/icons-material/KeyboardArrowDownOutlined";
 import KeyboardArrowUpOutlined from "@mui/icons-material/KeyboardArrowUpOutlined";
 import FirstPageOutlined from "@mui/icons-material/FirstPageOutlined";
+import LastPageOutlined from "@mui/icons-material/LastPageOutlined";
 
 type SubItem = { label: string; href?: string };
 type NavItem = { label: string; icon: SvgIconComponent; href?: string; children?: SubItem[] };
@@ -78,6 +80,8 @@ const secondaryItems: NavItem[] = [
   { label: "Manage Agents", icon: HowToRegOutlined },
 ];
 
+const COLLAPSED_WIDTH = 72; // Figma: collapsed Left Nav is 72px wide
+
 const itemSx = {
   display: "flex",
   alignItems: "center",
@@ -90,10 +94,48 @@ const itemSx = {
   justifyContent: "flex-start",
 } as const;
 
-function NavRow({ item, open, onToggle }: { item: NavItem; open?: boolean; onToggle?: () => void }) {
+const collapsedItemSx = {
+  width: 48,
+  height: 48,
+  p: 0,
+  mx: "auto",
+  justifyContent: "center",
+} as const;
+
+function NavRow({
+  item,
+  open,
+  onToggle,
+  collapsed,
+  active,
+}: {
+  item: NavItem;
+  open?: boolean;
+  onToggle?: () => void;
+  collapsed?: boolean;
+  active?: boolean;
+}) {
   const { resetDashboard } = useDashboardReset();
   const Icon = item.icon;
   const hasChildren = Boolean(item.children);
+  if (collapsed) {
+    // Icon only. A group icon expands the nav and opens that group; a link icon goes to its page.
+    const sx = { ...itemSx, ...collapsedItemSx, ...(active && { bgcolor: "nav.groupOpen" }) };
+    const icon = <Icon />;
+    return (
+      <Tooltip title={item.label} placement="right">
+        {item.href && !hasChildren ? (
+          <ButtonBase component={NextLink} href={item.href} onClick={item.href === "/" ? resetDashboard : undefined} aria-label={item.label} sx={sx}>
+            {icon}
+          </ButtonBase>
+        ) : (
+          <ButtonBase onClick={onToggle} aria-label={item.label} sx={sx}>
+            {icon}
+          </ButtonBase>
+        )}
+      </Tooltip>
+    );
+  }
   const content = (
     <>
       <Icon />
@@ -120,11 +162,23 @@ function NavRow({ item, open, onToggle }: { item: NavItem; open?: boolean; onTog
   );
 }
 
-function NavGroup({ item, open, onToggle }: { item: NavItem; open: boolean; onToggle: () => void }) {
+function NavGroup({
+  item,
+  open,
+  onToggle,
+  collapsed,
+  active,
+}: {
+  item: NavItem;
+  open: boolean;
+  onToggle: () => void;
+  collapsed: boolean;
+  active: boolean;
+}) {
   return (
     <Box>
-      <NavRow item={item} open={open} onToggle={item.children ? onToggle : undefined} />
-      {open &&
+      <NavRow item={item} open={open && !collapsed} onToggle={item.children ? onToggle : undefined} collapsed={collapsed} active={active} />
+      {open && !collapsed &&
         item.children?.map((child, i) => {
           const last = i === item.children!.length - 1;
           const sx = {
@@ -161,11 +215,24 @@ export default function LeftNav() {
   // Only one group is open at a time: opening another group closes the previous one.
   const [openGroup, setOpenGroup] = useState<string | null>(onPriceReduction ? "On Market" : null);
   const toggleGroup = (label: string) => setOpenGroup((current) => (current === label ? null : label));
+  const [collapsed, setCollapsed] = useState(false);
+  // In the collapsed rail, a group icon expands the nav and opens that group.
+  const onItemToggle = (label: string) => {
+    if (collapsed) {
+      setCollapsed(false);
+      setOpenGroup(label);
+    } else {
+      toggleGroup(label);
+    }
+  };
+  const isActive = (item: NavItem) =>
+    item.href === "/" ? pathname === "/" : Boolean(item.children?.some((c) => c.href && pathname.startsWith(c.href)));
   return (
     <Box
       component="nav"
       sx={(t) => ({
-        width: t.custom.layout.navWidth,
+        width: collapsed ? COLLAPSED_WIDTH : t.custom.layout.navWidth,
+        transition: "width 200ms ease",
         flexShrink: 0,
         position: "sticky",
         top: 0,
@@ -177,18 +244,27 @@ export default function LeftNav() {
         overflowY: "auto",
       })}
     >
-      <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 1 }}>
-        <Box component="img" src="/assets/logo.svg" alt="" sx={{ width: 24, height: 24 }} />
-        <Typography variant="h4" sx={{ color: "common.white" }}>
-          DM Portal
-        </Typography>
+      <Box sx={{ p: 3, display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "flex-start", gap: 1, overflow: "hidden" }}>
+        <Box component="img" src="/assets/logo.svg" alt="" sx={{ width: 24, height: 24, flexShrink: 0 }} />
+        {!collapsed && (
+          <Typography variant="h4" sx={{ color: "common.white", whiteSpace: "nowrap" }}>
+            DM Portal
+          </Typography>
+        )}
       </Box>
 
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", px: 1 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Box>
             {mainItems.map((item) => (
-              <NavGroup key={item.label} item={item} open={openGroup === item.label} onToggle={() => toggleGroup(item.label)} />
+              <NavGroup
+                key={item.label}
+                item={item}
+                open={openGroup === item.label}
+                onToggle={() => onItemToggle(item.label)}
+                collapsed={collapsed}
+                active={isActive(item)}
+              />
             ))}
           </Box>
           <Box>
@@ -196,25 +272,42 @@ export default function LeftNav() {
               <Box sx={{ width: "100%", borderTop: 1, borderColor: "divider", opacity: 0.3 }} />
             </Box>
             {secondaryItems.map((item) => (
-              <NavGroup key={item.label} item={item} open={openGroup === item.label} onToggle={() => toggleGroup(item.label)} />
+              <NavGroup
+                key={item.label}
+                item={item}
+                open={openGroup === item.label}
+                onToggle={() => onItemToggle(item.label)}
+                collapsed={collapsed}
+                active={isActive(item)}
+              />
             ))}
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mx: -1 }}>
-          <Box sx={{ px: 1 }}>
-            {["Privacy Policy", "Terms & Conditions"].map((label) => (
-              <ButtonBase key={label} sx={itemSx}>
-                <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>
-                  {label}
-                </Typography>
-              </ButtonBase>
-            ))}
-          </Box>
-          <Box sx={{ borderTop: 1, borderColor: "divider", px: 1.5, py: 1, display: "flex", justifyContent: "flex-end" }}>
-            <IconButton size="small" aria-label="Collapse navigation" sx={{ color: "common.white" }}>
-              <FirstPageOutlined />
-            </IconButton>
+          {!collapsed && (
+            <Box sx={{ px: 1 }}>
+              {["Privacy Policy", "Terms & Conditions"].map((label) => (
+                <ButtonBase key={label} sx={itemSx}>
+                  <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>
+                    {label}
+                  </Typography>
+                </ButtonBase>
+              ))}
+            </Box>
+          )}
+          <Box sx={{ borderTop: 1, borderColor: "divider", px: 1.5, py: 1, display: "flex", justifyContent: collapsed ? "center" : "flex-end" }}>
+            <Tooltip title={collapsed ? "Expand navigation" : "Collapse navigation"} placement="right">
+              <IconButton
+                size="small"
+                aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+                aria-expanded={!collapsed}
+                onClick={() => setCollapsed((c) => !c)}
+                sx={{ color: "common.white" }}
+              >
+                {collapsed ? <LastPageOutlined /> : <FirstPageOutlined />}
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
       </Box>
