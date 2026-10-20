@@ -7,14 +7,32 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import FlagOutlined from "@mui/icons-material/FlagOutlined";
 import AccessTimeOutlined from "@mui/icons-material/AccessTimeOutlined";
-import { activeTaskTab, onMarketTasks, preListingTasks, taskTabs } from "@/data/dashboard";
+import AltRouteOutlined from "@mui/icons-material/AltRouteOutlined";
+import ViewListOutlined from "@mui/icons-material/ViewListOutlined";
+import type { SvgIconComponent } from "@mui/icons-material";
+import { activeTaskTab, bpoTasks, onMarketTasks, otherTasks, preListingTasks, taskTabs, type TaskRow } from "@/data/dashboard";
 import CardHeader from "./CardHeader";
 import CountBadge from "./CountBadge";
+
+const tabIcons: Record<string, SvgIconComponent> = {
+  "Pre-listing tasks": AccessTimeOutlined,
+  "On market tasks": FlagOutlined,
+  "Other tasks": AltRouteOutlined,
+  "BPO as a service": ViewListOutlined,
+};
+
+const tabRows: Record<string, TaskRow[]> = {
+  "Pre-listing tasks": preListingTasks,
+  "On market tasks": onMarketTasks,
+  "Other tasks": otherTasks,
+  "BPO as a service": bpoTasks,
+};
 
 export default function Tasks() {
   const [tab, setTab] = useState(activeTaskTab);
   const active = taskTabs.find((t) => t.label === tab) ?? taskTabs[1];
-  const rows = active.label === "On market tasks" ? onMarketTasks : active.label === "Pre-listing tasks" ? preListingTasks : [];
+  const rows = tabRows[active.label] ?? [];
+  const TabIcon = tabIcons[active.label] ?? FlagOutlined;
   const twoColumns = active.label === "Pre-listing tasks";
   return (
     <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 3 }}>
@@ -59,13 +77,13 @@ export default function Tasks() {
           <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 0.75 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                {active.label === "Pre-listing tasks" ? <AccessTimeOutlined sx={{ color: "primary.main" }} /> : <FlagOutlined sx={{ color: "primary.main" }} />}
+                <TabIcon sx={{ color: "primary.main" }} />
                 <Typography variant="body1" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
                   {active.label}
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ fontWeight: 700, letterSpacing: "2.1px", textTransform: "uppercase", lineHeight: "16px" }}>
-                {active.count}
+                {active.cardCount ?? active.count}
               </Typography>
             </Box>
             <Box

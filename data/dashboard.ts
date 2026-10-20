@@ -1,10 +1,11 @@
-export type TaskTab = { label: string; count: number };
+// `count` is the badge on the tab; `cardCount` is the total shown in the card header when Figma shows a different number
+export type TaskTab = { label: string; count: number; cardCount?: number };
 
 export const taskTabs: TaskTab[] = [
   { label: "Pre-listing tasks", count: 27 },
   { label: "On market tasks", count: 10 },
-  { label: "Other tasks", count: 16 },
-  { label: "BPO as a service", count: 16 },
+  { label: "Other tasks", count: 16, cardCount: 10 },
+  { label: "BPO as a service", count: 16, cardCount: 10 },
 ];
 
 export const activeTaskTab = "Pre-listing tasks";
@@ -17,6 +18,16 @@ export const onMarketTasks: TaskRow[] = [
   { label: "Overdue weekly listing reports", count: 2 },
   { label: "Price reduction", count: 2 },
   { label: "Review PSA", count: 2 },
+];
+
+export const otherTasks: TaskRow[] = [
+  { label: "View other tasks", count: 2 },
+  { label: "View signature tasks", count: 2 },
+];
+
+export const bpoTasks: TaskRow[] = [
+  { label: "Assign agents", count: 2 },
+  { label: "Review BPO", count: 2 },
 ];
 
 // Listed column by column: the first five rows are the left column, the last five the right column.
