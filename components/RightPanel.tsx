@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
@@ -8,6 +9,8 @@ import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import InputBase from "@mui/material/InputBase";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -33,6 +36,7 @@ import {
   type Message,
 } from "@/data/messages";
 import { priceReductions } from "@/data/priceReductions";
+import { squatterContractors, type Contractor } from "@/data/contractors";
 import { subject } from "@/data/property";
 import NoteHotspot from "@/components/notes/NoteHotspot";
 import { useCalculator } from "@/components/calculator/CalculatorProvider";
@@ -47,6 +51,12 @@ const attention = ["View new offers", "Price reduction", "Respond to urgent mess
 const suggested = ["Show a list of active contractors", "View most recent Messages", "View recent comps in your market"];
 
 const propertySuggested = ["Why $412K?", "Show only sold comps", "Draft a reply to Shoshana"];
+
+// Chips that start a question: clicking one puts its question in the Ask box
+const chipQuestions: Record<string, string> = {
+  "Price reduction": "Which price reduction tasks need my immediate attention?",
+  "Show a list of active contractors": "Which contractors do I know that can handle squatters in the Atlanta market?",
+};
 
 const priceReductionAttention = ["4 high-confidence ready to approve", "4 Tampa listings affected by comp drop"];
 const priceReductionSuggested = [
@@ -75,7 +85,17 @@ function LabelChip({ label, bg, onClick }: { label: string; bg: string; onClick?
   );
 }
 
-function ChipList({ title, chips, color }: { title: string; chips: string[]; color: "pink" | "teal" }) {
+function ChipList({
+  title,
+  chips,
+  color,
+  onChipClick,
+}: {
+  title: string;
+  chips: string[];
+  color: "pink" | "teal";
+  onChipClick?: (label: string) => void;
+}) {
   const bg = useTheme().palette.accent[color].light;
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -84,7 +104,7 @@ function ChipList({ title, chips, color }: { title: string; chips: string[]; col
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-start" }}>
         {chips.map((label) => (
-          <LabelChip key={label} label={label} bg={bg} />
+          <LabelChip key={label} label={label} bg={bg} onClick={onChipClick && chipQuestions[label] ? () => onChipClick(label) : undefined} />
         ))}
       </Box>
     </Box>
@@ -153,6 +173,7 @@ function LatestMessage({ onOpen }: { onOpen: () => void }) {
 }
 
 function PropertyAskView({ onOpenConversation }: { onOpenConversation: () => void }) {
+  const [question, setQuestion] = useState("");
   return (
     <>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -165,12 +186,23 @@ function PropertyAskView({ onOpenConversation }: { onOpenConversation: () => voi
       </Box>
       <LatestMessage onOpen={onOpenConversation} />
       <ChipList title="Suggested for you" chips={propertySuggested} color="teal" />
-      <AskBox />
+      <AskBox value={question} onChange={setQuestion} />
     </>
   );
 }
 
-function AskBox() {
+function AskBox({
+  value,
+  onChange,
+  inputRef,
+  onSubmit,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  inputRef?: React.Ref<HTMLTextAreaElement>;
+  /** Called when the person presses Enter or the send icon. Without it, Enter just adds a new line. */
+  onSubmit?: () => void;
+}) {
   return (
     <Box
       sx={(t) => ({
@@ -184,13 +216,134 @@ function AskBox() {
         justifyContent: "space-between",
       })}
     >
-      <Typography variant="body2" sx={{ color: "text.disabled" }}>
-        Ask a question
-      </Typography>
+      <InputBase
+        multiline
+        fullWidth
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (onSubmit && e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+            e.preventDefault();
+            onSubmit();
+          }
+        }}
+        inputRef={inputRef}
+        placeholder="Ask a question"
+        slotProps={{ input: { "aria-label": "Ask a question" } }}
+        sx={(t) => ({ ...t.typography.body2, alignItems: "flex-start", p: 0, flex: 1, overflow: "auto", "& textarea::placeholder": { color: t.palette.text.disabled, opacity: 1 } })}
+      />
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, color: "text.secondary" }}>
         <SettingsOutlined sx={{ fontSize: 18 }} />
         <MicNoneOutlined sx={{ fontSize: 18 }} />
-        <KeyboardReturnOutlined aria-label="Press enter to send" sx={{ fontSize: 18 }} />
+        {onSubmit ? (
+          <IconButton aria-label="Send question" size="small" disabled={!value.trim()} onClick={onSubmit} sx={{ p: 0, color: "inherit" }}>
+            <KeyboardReturnOutlined sx={{ fontSize: 18 }} />
+          </IconButton>
+        ) : (
+          <KeyboardReturnOutlined aria-label="Press enter to send" sx={{ fontSize: 18 }} />
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+const isPriceReductionQuestion = (q: string) => /price[- ]?reduction/i.test(q);
+
+type Answer = { id: number; question: string };
+
+function PriceReductionAnswer() {
+  const total = priceReductions.length;
+  const pending = priceReductions.filter((r) => r.pending).length;
+  const high = priceReductions.filter((r) => r.confidence === "High").length;
+  return (
+    <Typography variant="body2" sx={{ color: "text.primary" }}>
+      There are {total} properties in the queue for price reduction. {pending} are pending your approval, and {high} can be approved now with high
+      confidence.{" "}
+      <Box component={NextLink} href="/price-reductions" sx={{ color: "primary.main", fontWeight: "fontWeightMedium" }}>
+        Click here to see the list.
+      </Box>
+    </Typography>
+  );
+}
+
+function ContractorList({ contractors }: { contractors: Contractor[] }) {
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {contractors.map((c) => (
+        <Box key={c.email}>
+          <Typography variant="body2" sx={{ color: "text.primary", fontWeight: "fontWeightMedium" }}>
+            {c.company}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.primary" }}>
+            {c.contact}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.primary" }}>
+            {c.phone}
+          </Typography>
+          <Box component="a" href={`mailto:${c.email}`} sx={{ ...bodyLinkSx, display: "block", overflowWrap: "anywhere" }}>
+            {c.email}
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+const bodyLinkSx = { typography: "body2", color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" } } as const;
+
+function ContractorAnswer() {
+  const [showMore, setShowMore] = useState(false);
+  // A random 3 for this answer; the other 3 appear under "View more"
+  const [{ first, more }] = useState(() => {
+    const shuffled = [...squatterContractors].sort(() => Math.random() - 0.5);
+    return { first: shuffled.slice(0, 3), more: shuffled.slice(3) };
+  });
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="body2" sx={{ color: "text.primary" }}>
+        Here are 3 contractors in your network who can handle squatters in the Atlanta market.
+      </Typography>
+      <ContractorList contractors={first} />
+      {showMore && <ContractorList contractors={more} />}
+      {!showMore && (
+        <Box>
+          <Button size="small" onClick={() => setShowMore(true)} sx={{ minWidth: 0, px: 1, py: 0.25, ml: -1 }}>
+            View more
+          </Button>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+function AskAnswer({ answer, onClear }: { answer: Answer; onClear: () => void }) {
+  const { question } = answer;
+  return (
+    <Box
+      role="status"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        animation: "askAnswerIn 400ms ease-out",
+        "@keyframes askAnswerIn": { from: { opacity: 0, transform: "translateY(-4px)" }, to: { opacity: 1, transform: "none" } },
+        "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+      }}
+    >
+      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+        {question}
+      </Typography>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
+        <AutoAwesomeOutlined sx={{ fontSize: 16, mt: "2px", color: "primary.main" }} />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {/* The prototype answers the price reduction question with the queue summary and any other question with the contractor list */}
+          {isPriceReductionQuestion(question) ? <PriceReductionAnswer /> : <ContractorAnswer />}
+          <Box sx={{ mt: 1 }}>
+            <Button size="small" onClick={onClear} sx={{ minWidth: 0, px: 1, py: 0.25, ml: -1, color: "text.secondary" }}>
+              Clear
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
@@ -198,6 +351,57 @@ function AskBox() {
 
 function AskView({ onOpenConversation }: { onOpenConversation: () => void }) {
   const pathname = usePathname();
+  const [question, setQuestion] = useState("");
+  const askRef = useRef<HTMLTextAreaElement>(null);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const askWrap = useRef<HTMLDivElement>(null);
+  const typingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopTyping = () => {
+    if (typingTimer.current) clearInterval(typingTimer.current);
+    typingTimer.current = null;
+  };
+  useEffect(() => stopTyping, []);
+
+  // Scroll only the panel (not the page) so the Ask box and the newest answer under it are in view
+  const scrollToAsk = useCallback(() => {
+    const wrap = askWrap.current;
+    const panel = wrap?.closest("aside");
+    if (!wrap || !panel) return;
+    const top = panel.scrollTop + (wrap.getBoundingClientRect().top - panel.getBoundingClientRect().top) - 24;
+    panel.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, []);
+  const previousCount = useRef(0);
+  useEffect(() => {
+    if (answers.length > previousCount.current) scrollToAsk();
+    previousCount.current = answers.length;
+  }, [answers.length, scrollToAsk]);
+
+  // The question types itself in quickly instead of appearing all at once (instantly with reduced motion)
+  const askAbout = (label: string) => {
+    const text = chipQuestions[label];
+    if (!text) return;
+    stopTyping();
+    askRef.current?.focus();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setQuestion(text);
+      return;
+    }
+    let length = 0;
+    setQuestion("");
+    typingTimer.current = setInterval(() => {
+      length += 1;
+      setQuestion(text.slice(0, length));
+      if (length >= text.length) stopTyping();
+    }, 14);
+  };
+  const submit = () => {
+    const text = question.trim();
+    if (!text) return;
+    stopTyping();
+    // Newest answer goes on top, directly under the input
+    setAnswers((prev) => [{ id: Date.now(), question: text }, ...prev]);
+    setQuestion("");
+  };
   if (pathname === propertyPath) return <PropertyAskView onOpenConversation={onOpenConversation} />;
   const onPriceReductions = pathname === "/price-reductions";
   return (
@@ -209,9 +413,31 @@ function AskView({ onOpenConversation }: { onOpenConversation: () => void }) {
         title={onPriceReductions ? "Needs your attention" : "Needs your immediate attention"}
         chips={onPriceReductions ? priceReductionAttention : attention}
         color="pink"
+        onChipClick={askAbout}
       />
-      <ChipList title="Suggested for you" chips={onPriceReductions ? priceReductionSuggested : suggested} color="teal" />
-      <AskBox />
+      <ChipList title="Suggested for you" chips={onPriceReductions ? priceReductionSuggested : suggested} color="teal" onChipClick={askAbout} />
+      <Box ref={askWrap} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <AskBox
+          value={question}
+          onChange={(v) => {
+            stopTyping();
+            setQuestion(v);
+          }}
+          inputRef={askRef}
+          onSubmit={submit}
+        />
+        {answers.map((a) => (
+          <AskAnswer key={a.id} answer={a} onClear={() => setAnswers((prev) => prev.filter((x) => x.id !== a.id))} />
+        ))}
+        {/* Room below the last element so the fixed design notes button never covers it */}
+        <Box sx={{ mb: answers.length ? 13 : 0 }}>
+          {answers.length > 0 && (
+            <Button size="small" onClick={() => setAnswers([])} sx={{ minWidth: 0, px: 1, py: 0.25, ml: -1, color: "text.secondary" }}>
+              Clear all
+            </Button>
+          )}
+        </Box>
+      </Box>
     </>
   );
 }
