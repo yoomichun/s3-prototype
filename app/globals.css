@@ -6,11 +6,16 @@
   font-style: normal;
   font-display: swap;
 }
-/* The design uses Semibold (600). Only Bold was supplied, so 600 maps to it. */
+/*
+ * The design uses Semibold (600), but only Regular and Bold files were supplied.
+ * "Proxima Nova" therefore has no face heavier than Regular, so the browser
+ * synthesizes weight 600 from Regular. That reads lighter than the Bold file.
+ * Replace this with a real ProximaNova-Semibold file when one is available.
+ */
 @font-face {
-  font-family: "Proxima Nova";
+  font-family: "Proxima Nova Bold";
   src: url("/fonts/ProximaNova-Bold.otf") format("opentype");
-  font-weight: 600;
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }

@@ -82,7 +82,7 @@ export default function Tasks() {
                   {active.label}
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ fontWeight: 700, letterSpacing: "2.1px", textTransform: "uppercase", lineHeight: "16px" }}>
+              <Typography variant="body2" sx={{ fontFamily: '"Proxima Nova Bold", "Proxima Nova", sans-serif', fontWeight: 700, letterSpacing: "2.1px", textTransform: "uppercase", lineHeight: "16px" }}>
                 {active.cardCount ?? active.count}
               </Typography>
             </Box>
