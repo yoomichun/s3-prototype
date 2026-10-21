@@ -37,6 +37,7 @@ import {
 } from "@/data/messages";
 import { priceReductions } from "@/data/priceReductions";
 import { squatterContractors, type Contractor } from "@/data/contractors";
+import { adviceFor, conversationFor, findOffer, listAnswers, newOfferCount, newOffersByProperty, type Offer, type OfferAdvice, type OfferProperty } from "@/data/offers";
 import { subject } from "@/data/property";
 import NoteHotspot from "@/components/notes/NoteHotspot";
 import { useCalculator } from "@/components/calculator/CalculatorProvider";
@@ -90,11 +91,14 @@ function ChipList({
   chips,
   color,
   onChipClick,
+  isAskable = (label) => Boolean(chipQuestions[label]),
 }: {
   title: string;
   chips: string[];
   color: "pink" | "teal";
   onChipClick?: (label: string) => void;
+  /** Which chips start a question when clicked */
+  isAskable?: (label: string) => boolean;
 }) {
   const bg = useTheme().palette.accent[color].light;
   return (
@@ -104,7 +108,7 @@ function ChipList({
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-start" }}>
         {chips.map((label) => (
-          <LabelChip key={label} label={label} bg={bg} onClick={onChipClick && chipQuestions[label] ? () => onChipClick(label) : undefined} />
+          <LabelChip key={label} label={label} bg={bg} onClick={onChipClick && isAskable(label) ? () => onChipClick(label) : undefined} />
         ))}
       </Box>
     </Box>
@@ -249,7 +253,7 @@ function AskBox({
 
 const isPriceReductionQuestion = (q: string) => /price[- ]?reduction/i.test(q);
 
-type Answer = { id: number; question: string };
+type Answer = { id: number; question: string; kind: "priceReduction" | "contractors" | "text"; text?: string };
 
 function PriceReductionAnswer() {
   const total = priceReductions.length;
@@ -336,14 +340,42 @@ function AskAnswer({ answer, onClear }: { answer: Answer; onClear: () => void })
       <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
         <AutoAwesomeOutlined sx={{ fontSize: 16, mt: "2px", color: "primary.main" }} />
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          {/* The prototype answers the price reduction question with the queue summary and any other question with the contractor list */}
-          {isPriceReductionQuestion(question) ? <PriceReductionAnswer /> : <ContractorAnswer />}
+          {answer.kind === "priceReduction" ? (
+            <PriceReductionAnswer />
+          ) : answer.kind === "contractors" ? (
+            <ContractorAnswer />
+          ) : (
+            <Typography variant="body2" sx={{ color: "text.primary" }}>
+              {answer.text}
+            </Typography>
+          )}
           <Box sx={{ mt: 1 }}>
             <Button size="small" onClick={onClear} sx={{ minWidth: 0, px: 1, py: 0.25, ml: -1, color: "text.secondary" }}>
               Clear
             </Button>
           </Box>
         </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function PendingOffers() {
+  const bg = useTheme().palette.accent.pink.light;
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        Pending Offers
+      </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {newOffersByProperty.map(({ property, count }) => (
+          <Box key={property.slug} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="body2" sx={{ color: "text.primary" }}>
+              {property.street}
+            </Typography>
+            <LabelChip label={String(count)} bg={bg} />
+          </Box>
+        ))}
       </Box>
     </Box>
   );
@@ -377,8 +409,13 @@ function AskView({ onOpenConversation }: { onOpenConversation: () => void }) {
   }, [answers.length, scrollToAsk]);
 
   // The question types itself in quickly instead of appearing all at once (instantly with reduced motion)
+  // On the offers pages the Ask box answers offer questions from the sample offer data
+  const offerMatch = pathname.startsWith("/offers/") ? findOffer(pathname.split("/")[2] ?? "") : undefined;
+  const advice: OfferAdvice | null = offerMatch ? adviceFor(offerMatch.property, offerMatch.offer) : null;
+  const offerAnswers: Record<string, string> | null = pathname === "/offers" ? listAnswers() : (advice?.answers ?? null);
+  const askText = (label: string) => (offerAnswers ? (label in offerAnswers ? label : undefined) : chipQuestions[label]);
   const askAbout = (label: string) => {
-    const text = chipQuestions[label];
+    const text = askText(label);
     if (!text) return;
     stopTyping();
     askRef.current?.focus();
@@ -399,23 +436,56 @@ function AskView({ onOpenConversation }: { onOpenConversation: () => void }) {
     if (!text) return;
     stopTyping();
     // Newest answer goes on top, directly under the input
-    setAnswers((prev) => [{ id: Date.now(), question: text }, ...prev]);
+    let answer: Answer;
+    if (offerAnswers) {
+      const known = Object.keys(offerAnswers).find((q) => q.toLowerCase() === text.toLowerCase());
+      answer = {
+        id: Date.now(),
+        question: text,
+        kind: "text",
+        text: known ? offerAnswers[known] : "I can answer a few questions about these offers in this sample. Try one of the suggestions above.",
+      };
+    } else {
+      answer = { id: Date.now(), question: text, kind: isPriceReductionQuestion(text) ? "priceReduction" : "contractors" };
+    }
+    setAnswers((prev) => [answer, ...prev]);
     setQuestion("");
   };
   if (pathname === propertyPath) return <PropertyAskView onOpenConversation={onOpenConversation} />;
   const onPriceReductions = pathname === "/price-reductions";
+  const onOffersList = pathname === "/offers";
+  const offerChipsAskable = (label: string) => Boolean(offerAnswers && label in offerAnswers);
   return (
     <>
-      <Typography variant="h2" sx={{ color: "text.secondary" }}>
-        {onPriceReductions ? `${priceReductions.length} suggested price reductions` : "Welcome back, Michael."}
-      </Typography>
-      <ChipList
-        title={onPriceReductions ? "Needs your attention" : "Needs your immediate attention"}
-        chips={onPriceReductions ? priceReductionAttention : attention}
-        color="pink"
-        onChipClick={askAbout}
-      />
-      <ChipList title="Suggested for you" chips={onPriceReductions ? priceReductionSuggested : suggested} color="teal" onChipClick={askAbout} />
+      {onOffersList ? (
+        <>
+          <Typography variant="h2" sx={{ color: "text.secondary" }}>
+            You have {newOfferCount} new offers
+          </Typography>
+          <PendingOffers />
+          <ChipList title="Suggested for you" chips={Object.keys(offerAnswers ?? {})} color="teal" onChipClick={askAbout} isAskable={offerChipsAskable} />
+        </>
+      ) : advice ? (
+        <>
+          <Typography variant="h2" sx={{ color: "text.secondary" }}>
+            {advice.headline}
+          </Typography>
+          <ChipList title="Suggested for you" chips={Object.keys(advice.answers)} color="teal" onChipClick={askAbout} isAskable={offerChipsAskable} />
+        </>
+      ) : (
+        <>
+          <Typography variant="h2" sx={{ color: "text.secondary" }}>
+            {onPriceReductions ? `${priceReductions.length} suggested price reductions` : "Welcome back, Michael."}
+          </Typography>
+          <ChipList
+            title={onPriceReductions ? "Needs your attention" : "Needs your immediate attention"}
+            chips={onPriceReductions ? priceReductionAttention : attention}
+            color="pink"
+            onChipClick={askAbout}
+          />
+          <ChipList title="Suggested for you" chips={onPriceReductions ? priceReductionSuggested : suggested} color="teal" onChipClick={askAbout} />
+        </>
+      )}
       <Box ref={askWrap} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <AskBox
           value={question}
@@ -588,41 +658,227 @@ function formatNow() {
   return { date, time };
 }
 
-function Conversation({ onSwitchContact }: { onSwitchContact: () => void }) {
+type ConversationConfig = {
+  contactType: ContactType;
+  contact: string;
+  property: string;
+  /** Summary text, plus anything shown under it such as lists of suggestions */
+  summary: React.ReactNode;
+  agreement: string;
+  next: string;
+  /** Suggested actions. A draft is written into the message box when the action is clicked. */
+  actions: { label: string; draft?: string }[];
+  /** Newest first */
+  messages: Message[];
+  sendLabel: string;
+  /** Hide the suggested actions */
+  hideActions?: boolean;
+  /** When set, a button under the bars writes this message into the message box so it can be edited and sent */
+  composeDraft?: string;
+  /** Green and yellow bars with a title above each and bullets inside. Used instead of the Agreement and Next bars. */
+  bars?: { title: string; items: string[]; tone: "success" | "warning" }[];
+  /** A tighter layout that keeps the message box and send button on screen without scrolling */
+  compact?: boolean;
+};
+
+const defaultConversation: ConversationConfig = {
+  contactType: conversation.contactType,
+  contact: conversation.contact,
+  property: conversation.property,
+  summary: conversation.summary,
+  agreement: conversation.agreement,
+  next: conversation.next,
+  actions: conversation.suggestedActions.map((label) => ({ label })),
+  messages: conversation.messages,
+  sendLabel: "Send",
+};
+
+function BulletBar({ title, items, tone }: { title: string; items: string[]; tone: "success" | "warning" }) {
+  const t = useTheme();
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+      <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium", color: "text.primary" }}>
+        {title}
+      </Typography>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start", px: 1.5, py: 1, borderRadius: "4px", bgcolor: t.palette[tone].light }}>
+        <InfoOutlined sx={{ fontSize: 16, mt: "2px", color: t.palette[tone].main }} />
+        <Box component="ul" sx={{ m: 0, pl: 2, flex: 1, display: "flex", flexDirection: "column", gap: 0.5, typography: "body2", color: "text.primary" }}>
+          {items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function Conversation({ config = defaultConversation, onSwitchContact }: { config?: ConversationConfig; onSwitchContact?: () => void }) {
   const t = useTheme();
   const { openCalculator } = useCalculator();
-  const [messages, setMessages] = useState<Message[]>(conversation.messages);
+  const [messages, setMessages] = useState<Message[]>(config.messages);
   const [draft, setDraft] = useState("");
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const send = () => {
     const body = draft.trim();
     if (!body) return;
     const { date, time } = formatNow();
     setMessages((prev) => [
-      { id: `m-${Date.now()}`, date, time, from: { name: "Me", initials: "MW", role: "DM", isMe: true }, body },
+      { id: `m-${Date.now()}`, date, time, from: { name: "Yoomi C.", initials: "YC", role: "DM", isMe: true }, body },
       ...prev,
     ]);
     setDraft("");
   };
 
+  const runAction = (action: { label: string; draft?: string }) => {
+    if (action.label === calculatorChip) return openCalculator();
+    if (action.draft) {
+      setDraft(action.draft);
+      composerRef.current?.focus();
+    }
+  };
+
+  const compact = Boolean(config.compact);
+
+  const composer = (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: compact ? 1.5 : 2 }}>
+      <TextField
+        multiline
+        minRows={compact ? 3 : 4}
+        maxRows={8}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        inputRef={composerRef}
+        placeholder={`You are messaging ${config.contact} (${config.contactType})`}
+        slotProps={{ htmlInput: { "aria-label": "Message" } }}
+      />
+      <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+        <Button onClick={() => setDraft("")} sx={{ minWidth: 0, px: 1 }}>
+          Clear
+        </Button>
+        <Button variant="contained" onClick={send} disabled={!draft.trim()} sx={{ whiteSpace: "nowrap", px: 1.5 }}>
+          {config.sendLabel}
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  const history = (
+    <>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {messages.map((m) => (
+          <MessageLog key={m.id} message={m} />
+        ))}
+      </Box>
+      <Box sx={{ display: "flex", justifyContent: "center", color: "text.secondary" }}>
+        <MoreHorizOutlined />
+      </Box>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, py: 0.5, color: "text.secondary" }}>
+        <StopCircleOutlined />
+        <Typography variant="caption" sx={{ fontWeight: "fontWeightMedium" }}>
+          End of conversation
+        </Typography>
+      </Box>
+    </>
+  );
+
+  const summaryHeading = (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <AutoAwesomeOutlined sx={{ color: "primary.main" }} />
+      <Typography variant="body1" sx={{ fontWeight: "fontWeightMedium" }}>
+        Summary
+      </Typography>
+    </Box>
+  );
+
+  const createMessage = config.composeDraft ? (
+    <Box>
+      <Button
+        size="small"
+        onClick={() => {
+          setDraft(config.composeDraft ?? "");
+          composerRef.current?.focus();
+        }}
+        sx={{ minWidth: 0, px: 1, py: 0.25, ml: -1 }}
+      >
+        Create message with these suggestions
+      </Button>
+    </Box>
+  ) : null;
+
+  const bannerBlock = config.bars ? (
+    <>
+      {config.bars.map((bar) => (
+        <BulletBar key={bar.title} {...bar} />
+      ))}
+      {createMessage}
+    </>
+  ) : (
+    <>
+      <Alert
+        bg={t.palette.success.light}
+        iconColor={t.palette.success.main}
+        lead="Agreement:"
+        text={config.agreement}
+        leadWeight={t.typography.fontWeightMedium as number}
+      />
+      <Alert
+        bg={t.palette.warning.light}
+        iconColor={t.palette.warning.main}
+        lead="Next:"
+        text={config.next}
+        leadWeight={t.typography.fontWeightMedium as number}
+      />
+    </>
+  );
+
+  if (compact) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <LabelChip label={config.contactType} bg={t.palette.primary.light} />
+          <Typography variant="h3" sx={{ color: "text.secondary" }}>
+            {config.contact}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          {summaryHeading}
+          {typeof config.summary === "string" ? (
+            <Typography variant="body2" sx={{ color: "text.primary" }}>
+              {config.summary}
+            </Typography>
+          ) : (
+            config.summary
+          )}
+          {bannerBlock}
+        </Box>
+        {composer}
+        <Divider />
+        {history}
+      </Box>
+    );
+  }
+
   return (
     <>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <LabelChip label={conversation.contactType} bg={t.palette.primary.light} />
-          <Button size="small" onClick={onSwitchContact} sx={{ px: 1, py: 0.25 }}>
-            Switch contact
-          </Button>
+          <LabelChip label={config.contactType} bg={t.palette.primary.light} />
+          {onSwitchContact && (
+            <Button size="small" onClick={onSwitchContact} sx={{ px: 1, py: 0.25 }}>
+              Switch contact
+            </Button>
+          )}
         </Box>
         <Typography variant="h3" sx={{ color: "text.secondary" }}>
-          {conversation.contact}
+          {config.contact}
         </Typography>
         <Autocomplete
           fullWidth
           size="small"
           disableClearable
-          options={contactProperties[conversation.contact]}
-          value={conversation.property}
+          options={contactProperties[config.contact] ?? [config.property]}
+          value={config.property}
           readOnly
           renderInput={(params) => (
             <TextField
@@ -637,85 +893,63 @@ function Conversation({ onSwitchContact }: { onSwitchContact: () => void }) {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pb: 2 }}>
           <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <AutoAwesomeOutlined sx={{ color: "primary.main" }} />
-              <Typography variant="body1" sx={{ fontWeight: "fontWeightMedium" }}>
-                Summary
-              </Typography>
-            </Box>
+            {summaryHeading}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <AccessTimeOutlined sx={{ fontSize: 16 }} />
               <Typography variant="body2">Updated 2m ago</Typography>
             </Box>
           </Box>
-          <Typography variant="body2" sx={{ color: "text.primary" }}>
-            {conversation.summary}
-          </Typography>
-          <Alert
-            bg={t.palette.success.light}
-            iconColor={t.palette.success.main}
-            lead="Agreement:"
-            text={conversation.agreement}
-            leadWeight={t.typography.fontWeightMedium as number}
-          />
-          <Alert
-            bg={t.palette.warning.light}
-            iconColor={t.palette.warning.main}
-            lead="Next:"
-            text={conversation.next}
-            leadWeight={t.typography.fontWeightMedium as number}
-          />
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "flex-start" }}>
-            <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>
-              Suggested actions:
+          {typeof config.summary === "string" ? (
+            <Typography variant="body2" sx={{ color: "text.primary" }}>
+              {config.summary}
             </Typography>
-            {conversation.suggestedActions.map((label) => (
-              <LabelChip
-                key={label}
-                label={label}
-                bg={t.palette.accent.teal.light}
-                onClick={label === calculatorChip ? openCalculator : undefined}
-              />
-            ))}
-          </Box>
+          ) : (
+            config.summary
+          )}
+          {bannerBlock}
+          {!config.hideActions && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "flex-start" }}>
+              <Typography variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>
+                Suggested actions:
+              </Typography>
+              {config.actions.map((action) => (
+                <LabelChip key={action.label} label={action.label} bg={t.palette.accent.teal.light} onClick={action.label === calculatorChip || action.draft ? () => runAction(action) : undefined} />
+              ))}
+            </Box>
+          )}
         </Box>
         <Divider />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {messages.map((m) => (
-            <MessageLog key={m.id} message={m} />
-          ))}
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "center", color: "text.secondary" }}>
-          <MoreHorizOutlined />
-        </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, py: 0.5, color: "text.secondary" }}>
-          <StopCircleOutlined />
-          <Typography variant="caption" sx={{ fontWeight: "fontWeightMedium" }}>
-            End of conversation
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            multiline
-            minRows={4}
-            maxRows={6}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={`You are messaging ${conversation.contact} (${conversation.contactType})`}
-            slotProps={{ htmlInput: { "aria-label": "Message" } }}
-          />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, height: 64 }}>
-            <Button onClick={() => setDraft("")} sx={{ px: 1.5, alignSelf: "flex-start" }}>
-              Clear
-            </Button>
-            <Button variant="contained" onClick={send} disabled={!draft.trim()} sx={{ alignSelf: "flex-start" }}>
-              Send
-            </Button>
-          </Box>
-        </Box>
+        {/* The message box sits above the history so the newest message and the reply field stay together */}
+        {composer}
+        {history}
       </Box>
     </>
   );
+}
+
+/** The seller conversation for an offer, with the recommendation under Summary */
+function OfferConversationView({ property, offer }: { property: OfferProperty; offer: Offer }) {
+  const convo = conversationFor(property, offer);
+  const config: ConversationConfig = {
+    contactType: convo.contactType,
+    contact: convo.contact,
+    property: convo.property,
+    summary: convo.summary,
+    agreement: convo.agreement,
+    next: convo.next,
+    // The recommendation sits in the bars: what works in the green one, what to do about the rest in the yellow one
+    bars: [
+      { title: convo.strengthsTitle, items: convo.strengths, tone: "success" },
+      { title: convo.negotiateTitle, items: convo.negotiate, tone: "warning" },
+    ],
+    actions: convo.actions,
+    hideActions: true,
+    compact: true,
+    composeDraft: convo.draft,
+    messages: convo.messages,
+    sendLabel: convo.sendLabel,
+  };
+  return <Conversation key={offer.number} config={config} />;
 }
 
 function MessageView({ startInConversation }: { startInConversation: boolean }) {
@@ -777,7 +1011,16 @@ function MessageView({ startInConversation }: { startInConversation: boolean }) 
 }
 
 export default function RightPanel() {
-  const [tab, setTab] = useState<Tab>("ask");
+  const pathname = usePathname();
+  const onOfferPage = pathname.startsWith("/offers/");
+  const offerMatch = onOfferPage ? findOffer(pathname.split("/")[2] ?? "") : undefined;
+  // A review offer page opens on the Message tab; leaving it returns to Ask
+  const [tab, setTab] = useState<Tab>(onOfferPage ? "message" : "ask");
+  const wasOnOfferPage = useRef(onOfferPage);
+  useEffect(() => {
+    if (onOfferPage !== wasOnOfferPage.current) setTab(onOfferPage ? "message" : "ask");
+    wasOnOfferPage.current = onOfferPage;
+  }, [onOfferPage]);
   const [openedFromPreview, setOpenedFromPreview] = useState(false);
   const changeTab = (next: Tab) => {
     setOpenedFromPreview(false);
@@ -809,7 +1052,13 @@ export default function RightPanel() {
           })}
         >
           <TabSwitch value={tab} onChange={changeTab} />
-          {tab === "ask" ? <AskView onOpenConversation={openConversation} /> : <MessageView startInConversation={openedFromPreview} />}
+          {tab === "ask" ? (
+            <AskView onOpenConversation={openConversation} />
+          ) : offerMatch ? (
+            <OfferConversationView property={offerMatch.property} offer={offerMatch.offer} />
+          ) : (
+            <MessageView startInConversation={openedFromPreview} />
+          )}
         </Box>
       </Box>
     </Box>

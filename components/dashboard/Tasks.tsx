@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import NextLink from "next/link";
 import NoteHotspot from "@/components/notes/NoteHotspot";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -96,6 +97,7 @@ export default function Tasks() {
               {rows.map((row) => (
                 <ButtonBase
                   key={row.label}
+                  {...(row.href ? { component: NextLink, href: row.href } : {})}
                   sx={(t) => ({
                     display: "flex",
                     justifyContent: "space-between",

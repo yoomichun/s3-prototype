@@ -10,11 +10,11 @@ export const taskTabs: TaskTab[] = [
 
 export const activeTaskTab = "Pre-listing tasks";
 
-export type TaskRow = { label: string; count: number };
+export type TaskRow = { label: string; count: number; href?: string };
 
 export const onMarketTasks: TaskRow[] = [
   { label: "Listing agreement expiring", count: 2 },
-  { label: "Offers", count: 2 },
+  { label: "Offers", count: 2, href: "/offers" },
   { label: "Overdue weekly listing reports", count: 2 },
   { label: "Price reduction", count: 2 },
   { label: "Review PSA", count: 2 },

@@ -50,7 +50,7 @@ const mainItems: NavItem[] = [
     label: "On Market",
     icon: CampaignOutlined,
     children: [
-      { label: "Offers" },
+      { label: "Offers", href: "/offers" },
       { label: "Overdue Weekly Reports" },
       { label: "Price Reduction", href: "/price-reductions" },
       { label: "Review PSA" },
@@ -65,7 +65,7 @@ const mainItems: NavItem[] = [
 ];
 
 const secondaryItems: NavItem[] = [
-  { label: "Offers", icon: RequestQuoteOutlined },
+  { label: "Offers", icon: RequestQuoteOutlined, href: "/offers" },
   { label: "Market Activity", icon: AreaChartOutlined },
   { label: "Under Contract", icon: DescriptionOutlined },
   {
@@ -226,7 +226,11 @@ export default function LeftNav() {
     }
   };
   const isActive = (item: NavItem) =>
-    item.href === "/" ? pathname === "/" : Boolean(item.children?.some((c) => c.href && pathname.startsWith(c.href)));
+    item.href === "/"
+      ? pathname === "/"
+      : item.href
+        ? pathname.startsWith(item.href)
+        : Boolean(item.children?.some((c) => c.href && pathname.startsWith(c.href)));
   return (
     <Box
       component="nav"

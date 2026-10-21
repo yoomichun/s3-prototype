@@ -42,7 +42,7 @@ export const conversation = {
       id: "m2",
       date: "09/12/2026",
       time: "8:05 AM",
-      from: { name: "Me", initials: "MW", role: "DM", isMe: true },
+      from: { name: "Yoomi C.", initials: "YC", role: "DM", isMe: true },
       body: "Hi Shoshana, fair question. The home has been listed 45 days versus about 30 for similar homes in Tampa, showings are down 60% over the last two weeks, and three nearby homes sold within 2% of $412K. Holding costs run about $120 a day. If you'd rather not go that low, we could reduce to $420K now and revisit in two weeks. Want me to set that up?",
     },
     {
