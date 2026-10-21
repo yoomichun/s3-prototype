@@ -39,6 +39,7 @@ import { priceReductions } from "@/data/priceReductions";
 import { squatterContractors, type Contractor } from "@/data/contractors";
 import { adviceFor, conversationFor, findOffer, listAnswers, newOfferCount, newOffersByProperty, type Offer, type OfferAdvice, type OfferProperty } from "@/data/offers";
 import { subject } from "@/data/property";
+import NoteAnchor from "@/components/notes/NoteAnchor";
 import NoteHotspot from "@/components/notes/NoteHotspot";
 import { useCalculator } from "@/components/calculator/CalculatorProvider";
 
@@ -842,7 +843,11 @@ function Conversation({ config = defaultConversation, onSwitchContact }: { confi
           </Typography>
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          {summaryHeading}
+          <Box sx={{ display: "flex" }}>
+            <NoteAnchor id="offer-message" side="right">
+              {summaryHeading}
+            </NoteAnchor>
+          </Box>
           {typeof config.summary === "string" ? (
             <Typography variant="body2" sx={{ color: "text.primary" }}>
               {config.summary}

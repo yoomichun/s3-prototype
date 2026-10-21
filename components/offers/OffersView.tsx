@@ -30,6 +30,7 @@ import {
   type Offer,
   type OfferProperty,
 } from "@/data/offers";
+import NoteHotspot from "@/components/notes/NoteHotspot";
 import { OfferNumberChip, OfferStatusChip } from "./chips";
 
 const headerCellSx = {
@@ -104,6 +105,8 @@ function PropertyAccordion({ property, offers, defaultOpen }: { property: OfferP
   const [open, setOpen] = useState(defaultOpen);
   const panelId = `offers-${property.slug}`;
   return (
+    <Box sx={{ position: "relative" }}>
+      {property.slug === "330-meadowbrook-lane" && <NoteHotspot id="offers-list" top={12} left={-32} />}
     <Box sx={(t) => ({ bgcolor: "background.paper", borderRadius: "4px", boxShadow: 1, overflow: "hidden", p: 0, ...t.typography.body1 })}>
       <ButtonBase
         onClick={() => setOpen((o) => !o)}
@@ -130,6 +133,7 @@ function PropertyAccordion({ property, offers, defaultOpen }: { property: OfferP
           )}
         </Box>
       </Collapse>
+    </Box>
     </Box>
   );
 }

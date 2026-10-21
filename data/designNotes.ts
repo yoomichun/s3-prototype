@@ -67,6 +67,24 @@ export const designNotes = {
     text: "AI recommends $412,000, but the DM stays in control. Drag the price to see the trade-off live: net proceeds, days to sell, and holding costs. The suggested price sells about 35 days faster and saves $4,200 in holding costs, for $21,200 less in net proceeds.",
     action: "Drag the slider to see net proceeds, days to sell and holding cost update live.",
   },
+  "offers-task": {
+    n: 11,
+    headline: "From queue to offer in one click",
+    text: "Offers is a task like any other, so DMs find it where they already look. It opens the offer list directly, grouped by property, with new offers up front instead of buried in email.",
+    action: "Click Offers to open the offer list.",
+  },
+  "offers-list": {
+    n: 12,
+    headline: "Offers grouped by property",
+    text: "DMs think in properties, not offer numbers. Each property keeps all of its offers together, strong offers are flagged with a heart, and the Open Offers switch hides anything already decided.",
+    action: "Click a property to see its offers, then View Offer to review one.",
+  },
+  "offer-message": {
+    n: 13,
+    headline: "The recommendation, ready to send",
+    text: "Instead of a score the DM has to interpret, the AI writes the recommendation: why the offer works and what to negotiate. One click drafts the message to the seller, the DM edits it, and sends it.",
+    action: "Click Create message with these suggestions to draft it.",
+  },
 } satisfies Record<string, DesignNote>;
 
 export type NoteId = keyof typeof designNotes;

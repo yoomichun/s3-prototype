@@ -95,8 +95,9 @@ export default function Tasks() {
               }
             >
               {rows.map((row) => (
+                <Box key={row.label} sx={{ position: "relative" }}>
+                  {row.label === "Offers" && <NoteHotspot id="offers-task" top={2} left={-32} />}
                 <ButtonBase
-                  key={row.label}
                   {...(row.href ? { component: NextLink, href: row.href } : {})}
                   sx={(t) => ({
                     display: "flex",
@@ -116,6 +117,7 @@ export default function Tasks() {
                   {row.label}
                   <CountBadge count={row.count} />
                 </ButtonBase>
+                </Box>
               ))}
             </Box>
           </Box>
