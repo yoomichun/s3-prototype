@@ -179,8 +179,7 @@ function NavGroup({
     <Box>
       <NavRow item={item} open={open && !collapsed} onToggle={item.children ? onToggle : undefined} collapsed={collapsed} active={active} />
       {open && !collapsed &&
-        item.children?.map((child, i) => {
-          const last = i === item.children!.length - 1;
+        item.children?.map((child) => {
           const sx = {
             display: "flex",
             width: "100%",
@@ -192,7 +191,7 @@ function NavGroup({
             bgcolor: "nav.subItem",
             color: "common.white",
             textAlign: "left",
-            ...(last && { borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }),
+            borderRadius: 0,
           } as const;
           const label = <Typography variant="body2">{child.label}</Typography>;
           return child.href ? (
